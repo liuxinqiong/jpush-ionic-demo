@@ -22,7 +22,7 @@ namespace JPushTest
          * sendno 由你赋值的字段，这里会传递回来
          * ResponseResult http返回的相关信息
          */
-        public MessageResult sendNotification(string content)
+        public MessageResult sendNotification(HashSet<string> targets, TargetType targetType, string content)  
         {
             JPushClient client = new JPushClient(appKey, masterSecret);
             PushPayload pushPayload = new PushPayload();
@@ -37,7 +37,8 @@ namespace JPushTest
             pushPayload.options = initOption();
 
             //step4：发送目标,JPush提供了多种方式，别名，标签，注册id，分群，广播等。s_表示是静态函数的意思，Audience中还有个tag的成员函数，为了避免命名冲突
-            pushPayload.audience = Audience.all();//测试是暂时使用all
+            //pushPayload.audience = Audience.all();//测试是暂时使用all
+            pushPayload.audience = createAudience(targets, targetType); 
 
             //last step:发送并返回结果
             return client.SendPush(pushPayload);
@@ -89,6 +90,43 @@ namespace JPushTest
             return ops;
         }
 
+        private Audience createAudience(HashSet<string> targets, TargetType targetType)
+        {
+            Audience audience = null;
+            switch(targetType){
+                case TargetType.TAG: audience = tag(targets); break;
+                case TargetType.ALIAS: audience = alias(targets); break;
+                case TargetType.REGISTRATIONID: audience = registrationId(targets); break;
+                case TargetType.BROADCAST: audience = broadcast(); break;
+                default: break;
+            }
+            return audience;
+        }
+
+        //标签发送--项目
+        private Audience tag(HashSet<string> targets)
+        {
+            return Audience.s_tag(targets);
+        }
+
+        //别名发送--用户
+        private Audience alias(HashSet<string> targets)
+        {
+            return Audience.s_alias(targets);
+        }
+
+        //registrationId发送
+        private Audience registrationId(HashSet<string> targets)
+        {
+            return Audience.s_registrationId(targets);
+        }
+
+        //广播发送
+        private Audience broadcast()
+        {
+            return Audience.all();
+        }
+
         /*
          * 更多高级功能：
          * 1.Message 消息内容（可选）应用内消息。
@@ -115,5 +153,13 @@ namespace JPushTest
          *      Method - AliasDeviceListResult getAliasDeviceList(String alias, String platform)
          *      Method - public DefaultResult deleteAlias(String alias, String platform)
          */
+    }
+
+    public enum TargetType   
+    {
+        TAG,
+        ALIAS,
+        REGISTRATIONID,
+        BROADCAST
     }
 }

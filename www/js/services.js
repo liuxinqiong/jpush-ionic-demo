@@ -140,7 +140,10 @@ jpushdemo.factory('jpushService', ['$http', '$window', '$document', function ($h
     setTags: _setTags,
     setAlias: _setAlias,
     getRegistrationID:_getRegistrationID,
-    getUserNotificationSettings:_getUserNotificationSettings
+    getUserNotificationSettings:_getUserNotificationSettings,
+    clearLocalNotifications:_clearLocalNotifications,
+    setBadge:_setBadge,
+    resetBadge:_resetBadge
   };
 }])
 
